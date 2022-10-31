@@ -6,3 +6,9 @@ When complete, this project will contain a bytecode interpreter (VM) for the Lox
 My repo for part 1 of the book can be found [here](https://github.com/garfieldnate/crafting_interpreters_part1).
 
 The project is licensed under MIT, as is the code from the book (which, of course, makes up most of this project).
+
+## Building
+
+    cmake -S . -B build
+    cmake --build build
+
