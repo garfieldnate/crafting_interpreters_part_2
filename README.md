@@ -12,3 +12,6 @@ The project is licensed under MIT, as is the code from the book (which, of cours
     cmake -S . -B build
     cmake --build build
 
+## Running
+
+    build/clox

@@ -6,8 +6,8 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 
 configure_file(cloxConfig.h.in cloxConfig.h)
 
-add_executable(clox main.c)
+add_executable(clox main.c chunk.c debug.c memory.c)
 
 # must include project output directory because it contains generated header files
-include_directories(clox PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(clox PUBLIC "${PROJECT_BINARY_DIR}")
 
