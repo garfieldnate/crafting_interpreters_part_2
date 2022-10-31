@@ -15,3 +15,7 @@ The project is licensed under MIT, as is the code from the book (which, of cours
 ## Running
 
     build/clox
+
+## TODO
+
+* IntelliSense in VSCode not working; can't click on symbols to go to definition, etc.
