@@ -7,6 +7,7 @@ typedef enum {
   OP_RETURN,
 } OpCode;
 
+// With the following three functions, constitutes a dynamic array of instruction codes
 typedef struct {
   int count;
   int capacity;
