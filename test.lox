@@ -1,0 +1,8 @@
+if(12 > 4.789) {
+  foo = "hello";
+} else {
+  while(true) { // loop forever
+    print "wow!
+That's a lot of loops!";
+  }
+}

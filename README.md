@@ -14,7 +14,11 @@ The project is licensed under MIT, as is the code from the book (which, of cours
 
 ## Running
 
-    build/clox
+Once built, you can run the resulting executable with:
+
+    build/clox [file.lox]
+
+If no Lox source file is provided, the REPL will be started.
 
 ## TODO
 
