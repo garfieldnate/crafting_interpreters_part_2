@@ -19,3 +19,4 @@ The project is licensed under MIT, as is the code from the book (which, of cours
 ## TODO
 
 * IntelliSense in VSCode not working; can't click on symbols to go to definition, etc.
+* formatting in VSCode not working; runs forever and never reformats
