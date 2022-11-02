@@ -31,3 +31,5 @@ If no Lox source file is provided, the REPL will be started.
 
 ## TODO
 
+* try out CTest and add some tests
+* test out creating an installer with CPack
