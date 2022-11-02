@@ -1,7 +1,7 @@
 #ifndef CLOX_CONFIG_H
 #define CLOX_CONFIG_H
 
-#define clox_VERSION_MAJOR @clox_VERSION_MAJOR@
-#define clox_VERSION_MINOR @clox_VERSION_MINOR@
+#define clox_VERSION_MAJOR @clox_VERSION_MAJOR @
+#define clox_VERSION_MINOR @clox_VERSION_MINOR @
 
 #endif // CLOX_CONFIG_H

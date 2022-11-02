@@ -1,0 +1,14 @@
+{
+  "files.associations": {
+    "iostream": "cpp",
+    "*.in": "c",
+    "cloxconfig.h": "c",
+    "stdint.h": "c",
+    "common.h": "c",
+    "stdbool.h": "c",
+    "stdio.h": "c",
+    "debug.h": "c",
+    "value.h": "c"
+  },
+  "editor.formatOnSave": true
+}

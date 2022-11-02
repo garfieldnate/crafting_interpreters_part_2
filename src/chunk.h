@@ -28,21 +28,22 @@ typedef enum {
   OP_RETURN,
 } OpCode;
 
-// With the following three functions, constitutes a dynamic array of instruction codes
+// With the following three functions, constitutes a dynamic array of
+// instruction codes
 typedef struct {
   // count and capacity apply to both code and lines
   int count;
   int capacity;
-  uint8_t* code;
+  uint8_t *code;
   // line number corresponding to source that generated each instruction
-  int* lines;
+  int *lines;
   ValueArray constants;
 } Chunk;
 
-void initChunk(Chunk* chunk);
-void writeChunk(Chunk* chunk, uint8_t byte, int line);
+void initChunk(Chunk *chunk);
+void writeChunk(Chunk *chunk, uint8_t byte, int line);
 // returns the index of the newly-added value in the chunk's constant array
-int addConstant(Chunk* chunk, Value value);
-void freeChunk(Chunk* chunk);
+int addConstant(Chunk *chunk, Value value);
+void freeChunk(Chunk *chunk);
 
 #endif

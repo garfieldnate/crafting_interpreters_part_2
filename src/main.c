@@ -10,10 +10,10 @@
 
 static void repl() {
   char line[1024];
-  for(;;) {
+  for (;;) {
     printf("> ");
 
-    if(!fgets(line, sizeof(line), stdin)) {
+    if (!fgets(line, sizeof(line), stdin)) {
       printf("\n");
       break;
     }
@@ -24,8 +24,8 @@ static void repl() {
 
 // returns a heap-allocated string containing the contents of the file;
 // client is responsible for free'ing the returned string
-static char* readFile(const char* path) {
-  FILE* file = fopen(path, "rb");
+static char *readFile(const char *path) {
+  FILE *file = fopen(path, "rb");
   if (file == NULL) {
     fprintf(stderr, "Could not open file \"%s\".\n", path);
     exit(74);
@@ -35,7 +35,7 @@ static char* readFile(const char* path) {
   size_t fileSize = ftell(file);
   rewind(file);
 
-  char* buffer = (char*)malloc(fileSize + 1);
+  char *buffer = (char *)malloc(fileSize + 1);
   if (buffer == NULL) {
     fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
     exit(74);
@@ -51,8 +51,8 @@ static char* readFile(const char* path) {
   return buffer;
 }
 
-static void runFile(const char* path) {
-  char* source = readFile(path);
+static void runFile(const char *path) {
+  char *source = readFile(path);
   InterpretResult result = interpret(source);
   free(source);
 

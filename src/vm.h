@@ -7,13 +7,13 @@
 #define STACK_MAX 256
 
 typedef struct {
-  Chunk* chunk;
+  Chunk *chunk;
   // instruction pointer; points to NEXT byte to be read
-  uint8_t* ip;
+  uint8_t *ip;
   Value stack[STACK_MAX];
   // points to the next free slot in the stack (so the top element is
   // actually stack[stackTop - 1])
-  Value* stackTop;
+  Value *stackTop;
 } VM;
 
 typedef enum {
@@ -24,7 +24,7 @@ typedef enum {
 
 void initVM();
 void freeVM();
-InterpretResult interpret(const char* source);
+InterpretResult interpret(const char *source);
 
 // manipulate the VM stack
 void push(Value value);

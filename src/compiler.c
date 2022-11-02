@@ -23,15 +23,15 @@ typedef struct {
 // ordered by precedence
 typedef enum {
   PREC_NONE,
-  PREC_ASSIGNMENT,  // =
-  PREC_OR,          // or
-  PREC_AND,         // and
-  PREC_EQUALITY,    // == !=
-  PREC_COMPARISON,  // < > <= >=
-  PREC_TERM,        // + -
-  PREC_FACTOR,      // * /
-  PREC_UNARY,       // ! -
-  PREC_CALL,        // . ()
+  PREC_ASSIGNMENT, // =
+  PREC_OR,         // or
+  PREC_AND,        // and
+  PREC_EQUALITY,   // == !=
+  PREC_COMPARISON, // < > <= >=
+  PREC_TERM,       // + -
+  PREC_FACTOR,     // * /
+  PREC_UNARY,      // ! -
+  PREC_CALL,       // . ()
   PREC_PRIMARY
 } Precedence;
 
@@ -46,13 +46,11 @@ typedef struct {
 
 // global variables; TODO: pass around pointer instead
 Parser parser;
-Chunk* compilingChunk;
+Chunk *compilingChunk;
 
-static Chunk* currentChunk() {
-  return compilingChunk;
-}
+static Chunk *currentChunk() { return compilingChunk; }
 
-static void errorAt(Token* token, const char* message) {
+static void errorAt(Token *token, const char *message) {
   // only report the first error between synchronization points
   if (parser.panicMode) {
     return;
@@ -73,11 +71,9 @@ static void errorAt(Token* token, const char* message) {
 }
 
 // TODO: rename errorAtPrevious
-static void error(const char* message) {
-  errorAt(&parser.previous, message);
-}
+static void error(const char *message) { errorAt(&parser.previous, message); }
 
-static void errorAtCurrent(const char* message) {
+static void errorAtCurrent(const char *message) {
   errorAt(&parser.current, message);
 }
 
@@ -94,7 +90,7 @@ static void advance() {
   }
 }
 
-static void consume(TokenType type, const char* message) {
+static void consume(TokenType type, const char *message) {
   if (parser.current.type == type) {
     advance();
     return;
@@ -116,14 +112,13 @@ static void emitBytes(uint8_t byte1, uint8_t byte2) {
   emitByte(byte2);
 }
 
-static void emitReturn() {
-  emitByte(OP_RETURN);
-}
+static void emitReturn() { emitByte(OP_RETURN); }
 
 static uint8_t makeConstant(Value value) {
   int constant = addConstant(currentChunk(), value);
   // OP_CONSTANT instruction uses single byte operand
-  // if we want to allow more constants, we need an OP_CONSTANT_16 instruction that takes a two-byte operand
+  // if we want to allow more constants, we need an OP_CONSTANT_16 instruction
+  // that takes a two-byte operand
   if (constant > UINT8_MAX) {
     error("Too many constants in one chunk.");
     return 0;
@@ -137,7 +132,8 @@ static void emitConstant(Value value) {
 }
 
 static void endCompiler() {
-  // for now we only compile single expressions, so we hard-code returning their result
+  // for now we only compile single expressions, so we hard-code returning their
+  // result
   emitReturn();
 
 #ifdef DEBUG_PRINT_CODE
@@ -149,43 +145,77 @@ static void endCompiler() {
 
 // need some forward declarations since we use recursion
 static void expression();
-static const ParseRule* getRule(TokenType type);
+static const ParseRule *getRule(TokenType type);
 static void parseExpressionWithPrecedence(Precedence precedence);
 
 static void binary() {
-  // left-hand operand has already been consumed and compiled, and the value is placed on the stack
-  // next we compile the right-hand operand, pushing it to the stack, and then emit
-  // the bytecode to work with the two operands on the stack
+  // left-hand operand has already been consumed and compiled, and the value is
+  // placed on the stack next we compile the right-hand operand, pushing it to
+  // the stack, and then emit the bytecode to work with the two operands on the
+  // stack
   TokenType operatorType = parser.previous.type;
-  const ParseRule* rule = getRule(operatorType);
-  // each binary operator’s right-hand operand precedence is one level higher than its own, i.e.
-  // when parsing 2*3+4, the right-hand operand for * should be only 3, not 3+4. Adding one
-  // level of precedence like this results in left-associativity.
+  const ParseRule *rule = getRule(operatorType);
+  // each binary operator’s right-hand operand precedence is one level higher
+  // than its own, i.e. when parsing 2*3+4, the right-hand operand for * should
+  // be only 3, not 3+4. Adding one level of precedence like this results in
+  // left-associativity.
   parseExpressionWithPrecedence((Precedence)(rule->precedence + 1));
 
   switch (operatorType) {
-    // TODO: IEEE 754 says that comparison with NaN should always return false, but for simplicity we haven't implemented that yet
-    // TODO: for performance, would be better to use dedicated instructions instead of combining two
-    case TOKEN_BANG_EQUAL:    emitBytes(OP_EQUAL, OP_NOT); break;
-    case TOKEN_EQUAL_EQUAL:   emitByte(OP_EQUAL); break;
-    case TOKEN_GREATER:       emitByte(OP_GREATER); break;
-    case TOKEN_GREATER_EQUAL: emitBytes(OP_LESS, OP_NOT); break;
-    case TOKEN_LESS:          emitByte(OP_LESS); break;
-    case TOKEN_LESS_EQUAL:    emitBytes(OP_GREATER, OP_NOT); break;
-    case TOKEN_PLUS:          emitByte(OP_ADD); break;
-    case TOKEN_MINUS:         emitByte(OP_SUBTRACT); break;
-    case TOKEN_STAR:          emitByte(OP_MULTIPLY); break;
-    case TOKEN_SLASH:         emitByte(OP_DIVIDE); break;
-    default: error("Unknown binary operator."); return; // Unreachable.
+  // TODO: IEEE 754 says that comparison with NaN should always return false,
+  // but for simplicity we haven't implemented that yet
+  // TODO: for performance, would be better to use dedicated instructions
+  // instead of combining two
+  case TOKEN_BANG_EQUAL:
+    emitBytes(OP_EQUAL, OP_NOT);
+    break;
+  case TOKEN_EQUAL_EQUAL:
+    emitByte(OP_EQUAL);
+    break;
+  case TOKEN_GREATER:
+    emitByte(OP_GREATER);
+    break;
+  case TOKEN_GREATER_EQUAL:
+    emitBytes(OP_LESS, OP_NOT);
+    break;
+  case TOKEN_LESS:
+    emitByte(OP_LESS);
+    break;
+  case TOKEN_LESS_EQUAL:
+    emitBytes(OP_GREATER, OP_NOT);
+    break;
+  case TOKEN_PLUS:
+    emitByte(OP_ADD);
+    break;
+  case TOKEN_MINUS:
+    emitByte(OP_SUBTRACT);
+    break;
+  case TOKEN_STAR:
+    emitByte(OP_MULTIPLY);
+    break;
+  case TOKEN_SLASH:
+    emitByte(OP_DIVIDE);
+    break;
+  default:
+    error("Unknown binary operator.");
+    return; // Unreachable.
   }
 }
 
 static void literal() {
   switch (parser.previous.type) {
-    case TOKEN_FALSE: emitByte(OP_FALSE); break;
-    case TOKEN_NIL: emitByte(OP_NIL); break;
-    case TOKEN_TRUE: emitByte(OP_TRUE); break;
-    default: error("Unknown literal."); return; // Unreachable.
+  case TOKEN_FALSE:
+    emitByte(OP_FALSE);
+    break;
+  case TOKEN_NIL:
+    emitByte(OP_NIL);
+    break;
+  case TOKEN_TRUE:
+    emitByte(OP_TRUE);
+    break;
+  default:
+    error("Unknown literal.");
+    return; // Unreachable.
   }
 }
 
@@ -211,74 +241,74 @@ static void unary() {
 
   // Emit the operator instruction to manipulate the value stored on the stack
   switch (operatorType) {
-    case TOKEN_BANG: {
-      emitByteAtLine(OP_NOT, line);
-      break;
-    }
-    case TOKEN_MINUS: {
-      emitByteAtLine(OP_NEGATE, line);
-      break;
-    }
-    default: {
-      // unreachable
-      error("Unknown unary operator.");
-      return;
-    }
+  case TOKEN_BANG: {
+    emitByteAtLine(OP_NOT, line);
+    break;
+  }
+  case TOKEN_MINUS: {
+    emitByteAtLine(OP_NEGATE, line);
+    break;
+  }
+  default: {
+    // unreachable
+    error("Unknown unary operator.");
+    return;
+  }
   }
 }
 
 const ParseRule rules[] = {
-  [TOKEN_LEFT_PAREN]    = {grouping, NULL,   PREC_NONE},
-  [TOKEN_RIGHT_PAREN]   = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_LEFT_BRACE]    = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_RIGHT_BRACE]   = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_COMMA]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_DOT]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_MINUS]         = {unary,    binary, PREC_TERM},
-  [TOKEN_PLUS]          = {NULL,     binary, PREC_TERM},
-  [TOKEN_SEMICOLON]     = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_SLASH]         = {NULL,     binary, PREC_FACTOR},
-  [TOKEN_STAR]          = {NULL,     binary, PREC_FACTOR},
-  [TOKEN_BANG]          = {unary,    NULL,   PREC_NONE},
-  [TOKEN_BANG_EQUAL]    = {NULL,     binary, PREC_EQUALITY},
-  [TOKEN_EQUAL]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_EQUAL_EQUAL]   = {NULL,     binary, PREC_EQUALITY},
-  [TOKEN_GREATER]       = {NULL,     binary, PREC_COMPARISON},
-  [TOKEN_GREATER_EQUAL] = {NULL,     binary, PREC_COMPARISON},
-  [TOKEN_LESS]          = {NULL,     binary, PREC_COMPARISON},
-  [TOKEN_LESS_EQUAL]    = {NULL,     binary, PREC_COMPARISON},
-  [TOKEN_IDENTIFIER]    = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_STRING]        = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_NUMBER]        = {number,   NULL,   PREC_NONE},
-  [TOKEN_AND]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_CLASS]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_ELSE]          = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_FALSE]         = {literal,  NULL,   PREC_NONE},
-  [TOKEN_FOR]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_FUN]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_IF]            = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_NIL]           = {literal,  NULL,   PREC_NONE},
-  [TOKEN_OR]            = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_PRINT]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_RETURN]        = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_SUPER]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_THIS]          = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_TRUE]          = {literal,  NULL,   PREC_NONE},
-  [TOKEN_VAR]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_WHILE]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_ERROR]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_EOF]           = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
+    [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
+    [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
+    [TOKEN_DOT] = {NULL, NULL, PREC_NONE},
+    [TOKEN_MINUS] = {unary, binary, PREC_TERM},
+    [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
+    [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},
+    [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_BANG] = {unary, NULL, PREC_NONE},
+    [TOKEN_BANG_EQUAL] = {NULL, binary, PREC_EQUALITY},
+    [TOKEN_EQUAL] = {NULL, NULL, PREC_NONE},
+    [TOKEN_EQUAL_EQUAL] = {NULL, binary, PREC_EQUALITY},
+    [TOKEN_GREATER] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_STRING] = {NULL, NULL, PREC_NONE},
+    [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
+    [TOKEN_AND] = {NULL, NULL, PREC_NONE},
+    [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
+    [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
+    [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IF] = {NULL, NULL, PREC_NONE},
+    [TOKEN_NIL] = {literal, NULL, PREC_NONE},
+    [TOKEN_OR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
+    [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
+    [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_THIS] = {NULL, NULL, PREC_NONE},
+    [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
+    [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_EOF] = {NULL, NULL, PREC_NONE},
 };
 
-static const ParseRule* getRule(TokenType type) {
-  return &rules[type];
-}
+static const ParseRule *getRule(TokenType type) { return &rules[type]; }
 
-// start at the current token and parse any expression with at least the given precedence
+// start at the current token and parse any expression with at least the given
+// precedence
 static void parseExpressionWithPrecedence(Precedence precedence) {
   advance();
 
-  // expressions ALWAYS start with prefix rule, such as a unary operator or a number
+  // expressions ALWAYS start with prefix rule, such as a unary operator or a
+  // number
   ParseFn prefixRule = getRule(parser.previous.type)->prefix;
   if (prefixRule == NULL) {
     error("Expected expression.");
@@ -301,7 +331,7 @@ static void expression() {
   parseExpressionWithPrecedence(PREC_ASSIGNMENT);
 }
 
-bool compile(const char* source, Chunk* chunk) {
+bool compile(const char *source, Chunk *chunk) {
   initScanner(source);
   compilingChunk = chunk;
 

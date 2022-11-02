@@ -22,5 +22,3 @@ If no Lox source file is provided, the REPL will be started.
 
 ## TODO
 
-* IntelliSense in VSCode not working; can't click on symbols to go to definition, etc.
-* formatting in VSCode not working; runs forever and never reformats
