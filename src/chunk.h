@@ -5,7 +5,12 @@
 #include "value.h"
 
 typedef enum {
+  // push values onto the stack
+  // use specialized instructions for NIL, true and false for better performance
   OP_CONSTANT,
+  OP_NIL,
+  OP_TRUE,
+  OP_FALSE,
 
   // binary operators
   OP_ADD,
