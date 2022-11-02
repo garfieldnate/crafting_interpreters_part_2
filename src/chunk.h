@@ -19,6 +19,7 @@ typedef enum {
   OP_DIVIDE,
 
   // unary operators
+  OP_NOT,
   OP_NEGATE,
 
   OP_RETURN,

@@ -50,6 +50,11 @@ static Value peek(int distance) {
   return vm.stackTop[-1 - distance];
 }
 
+// we treat nil and false as falsey; 0.0 is not falsey!
+static bool isFalsey(Value value) {
+  return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
 InterpretResult run() {
   // get the next byte of code and then increment the instruction pointer
   #define READ_BYTE() (*vm.ip++)
@@ -116,6 +121,10 @@ InterpretResult run() {
       }
       case OP_DIVIDE: {
         BINARY_OP(NUMBER_VAL, /);
+        break;
+      }
+      case OP_NOT: {
+        push(BOOL_VAL(isFalsey(pop())));
         break;
       }
       case OP_NEGATE: {
