@@ -7,8 +7,8 @@
 #include "cloxConfig.h"
 
 // when defined, print out bytecode before execution
-#define DEBUG_PRINT_CODE
+#define DEBUG_PRINT_CODE true
 // when defined, the VM prints the stack and the disassembled bytecode as it's being executed
-#define DEBUG_TRACE_EXECUTION
+#define DEBUG_TRACE_EXECUTION true
 
 #endif
