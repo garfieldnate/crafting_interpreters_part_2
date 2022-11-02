@@ -27,5 +27,5 @@ void freeValueArray(ValueArray *array) {
 
 // TODO: take stream parameter for writing to
 void printValue(Value value) {
-  printf("%g", value);
+  printf("%g", AS_NUMBER(value));
 }
