@@ -9,7 +9,16 @@ The project is licensed under MIT, as is the code from the book (which, of cours
 
 ## Building
 
+First, configure the project (generate the build directory):
+
     cmake -S . -B build
+
+To enable one of the debug options specified in `CMakeLists.txt`, use the `-D` flag:
+
+    cmake -S . -B build -DDEBUG_PRINT_CODE=ON
+
+Next, build the project:
+
     cmake --build build
 
 ## Running

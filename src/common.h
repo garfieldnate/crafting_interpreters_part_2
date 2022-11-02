@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 // when defined, print out bytecode before execution
-#define DEBUG_PRINT_CODE true
+#define DEBUG_PRINT_CODE
 // when defined, the VM prints the stack and the disassembled bytecode as it's
 // being executed
-#define DEBUG_TRACE_EXECUTION true
+#define DEBUG_TRACE_EXECUTION
 
 #endif
