@@ -19,7 +19,7 @@ endif(DEBUG_TRACE_EXECUTION)
 
 configure_file(src/cloxConfig.h.in cloxConfig.h)
 
-add_executable(clox src/main.c src/chunk.c src/compiler.c src/debug.c src/memory.c src/scanner.c src/value.c src/vm.c)
+add_executable(clox src/main.c src/chunk.c src/compiler.c src/debug.c src/memory.c src/object.c src/scanner.c src/value.c src/vm.c)
 
 # must include project output directory because it contains generated header files
 target_include_directories(clox PUBLIC "${PROJECT_BINARY_DIR}")

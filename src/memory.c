@@ -3,6 +3,7 @@
 
 #include "memory.h"
 
+// call reallocate(NULL, 0, size_t) to malloc new memory
 void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
   if (newSize == 0) {
     free(pointer);
