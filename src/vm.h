@@ -14,6 +14,9 @@ typedef struct {
   // points to the next free slot in the stack (so the top element is
   // actually stack[stackTop - 1])
   Value *stackTop;
+  // pointer to beginning of linked list of all allocated objects (for
+  // dead-simple GC)
+  Obj *objects;
 } VM;
 
 typedef enum {
@@ -21,6 +24,8 @@ typedef enum {
   INTERPRET_COMPILE_ERROR,
   INTERPRET_RUNTIME_ERROR,
 } InterpretResult;
+
+extern VM vm;
 
 void initVM();
 void freeVM();

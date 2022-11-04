@@ -11,7 +11,7 @@
 #include "vm.h"
 
 // global VM instance
-// eliminate global and pass VM pointer around instead
+// TODO: eliminate global and pass VM pointer around instead
 VM vm;
 
 static void resetStack() { vm.stackTop = vm.stack; }
@@ -28,11 +28,12 @@ static void runtimeError(const char *format, ...) {
   int line = vm.chunk->lines[instruction];
   fprintf(stderr, "[line %d] in script\n", line);
   resetStack();
+  vm.objects = NULL;
 }
 
 void initVM() { resetStack(); }
 
-void freeVM() {}
+void freeVM() { freeObjects(); }
 
 // TODO: shouldn't we check the stack size for overflow?
 void push(Value value) {

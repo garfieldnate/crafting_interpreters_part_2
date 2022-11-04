@@ -17,8 +17,15 @@ typedef enum {
 
 struct Obj {
   ObjType type;
+  // dead-simple GC for now: all allocated objects form a linked-list we can
+  // traverse and free
+  struct Obj *next;
 };
 
+// TODO: would be more efficient to use a
+// https://en.wikipedia.org/wiki/Flexible_array_member to avoid double realloc
+// calls for string creation/destruction as well as double pointer
+// indirection whenever accessing chars
 struct ObjString {
   Obj obj;
   int length;
