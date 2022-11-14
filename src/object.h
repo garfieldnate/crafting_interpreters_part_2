@@ -30,6 +30,8 @@ struct ObjString {
   Obj obj;
   int length;
   char *chars;
+  // for use as a Table key; cache for performance
+  uint32_t hash;
 };
 
 ObjString *takeString(char *chars, int length);
