@@ -20,7 +20,15 @@
     "string_view": "c",
     "unordered_map": "c",
     "vector": "c",
-    "memory.h": "c"
+    "memory.h": "c",
+    "__locale": "c",
+    "__threading_support": "c",
+    "bitset": "c",
+    "functional": "c",
+    "optional": "c",
+    "system_error": "c",
+    "type_traits": "c",
+    "utility": "c"
   },
   "editor.formatOnSave": true
 }

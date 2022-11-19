@@ -28,12 +28,18 @@ static void runtimeError(const char *format, ...) {
   int line = vm.chunk->lines[instruction];
   fprintf(stderr, "[line %d] in script\n", line);
   resetStack();
-  vm.objects = NULL;
 }
 
-void initVM() { resetStack(); }
+void initVM() {
+  resetStack();
+  vm.objects = NULL;
+  initTable(&vm.strings);
+}
 
-void freeVM() { freeObjects(); }
+void freeVM() {
+  freeTable(&vm.strings);
+  freeObjects();
+}
 
 // TODO: shouldn't we check the stack size for overflow?
 void push(Value value) {

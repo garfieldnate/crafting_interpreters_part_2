@@ -48,6 +48,7 @@ Entry *findEntry(Entry *entries, int capacity, ObjString *key) {
           tombstone = entry;
         }
       }
+      // == okay because all strings are interned
     } else if (entry->key == key) {
       // found the key
       return entry;
@@ -144,5 +145,29 @@ void tableAddAll(Table *from, Table *to) {
     if (entry->key != NULL) {
       tableSet(to, entry->key, entry->value);
     }
+  }
+}
+
+ObjString *tableFindInternedString(Table *table, const char *chars, int length,
+                                   uint32_t hash) {
+  if (table->count == 0) {
+    return NULL;
+  }
+
+  uint32_t index = hash % table->capacity;
+  for (;;) {
+    Entry *entry = &table->entries[index];
+    if (entry->key == NULL) {
+      // stop when we find an empty, non-tombstone entry
+      if (IS_NIL(entry->value)) {
+        return NULL;
+      }
+    } else if (entry->key->length == length && entry->key->hash == hash &&
+               memcmp(entry->key->chars, chars, length) == 0) {
+      // found the interned string
+      return entry->key;
+    }
+
+    index = (index + 1) % table->capacity;
   }
 }

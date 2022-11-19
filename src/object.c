@@ -3,6 +3,7 @@
 
 #include "memory.h"
 #include "object.h"
+#include "table.h"
 #include "value.h"
 #include "vm.h"
 
@@ -26,6 +27,8 @@ static ObjString *allocateString(char *chars, int length, uint32_t hash) {
   string->length = length;
   string->chars = chars;
   string->hash = hash;
+  // intern string
+  tableSet(&vm.strings, string, NIL_VAL);
   return string;
 }
 
@@ -34,21 +37,37 @@ static ObjString *allocateString(char *chars, int length, uint32_t hash) {
  * (https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function#FNV-1a_hash)
  *
  */
-static uint32_t hashString(char *key, int length) {
+static uint32_t hashString(const char *key, int length) {
   uint32_t hash = FNV_32_OFFSET_BASIS;
   for (int i = 0; i < length; i++) {
     hash ^= (uint8_t)key[i];
     hash *= FNV_32_PRIME;
   }
+  return hash;
 }
 
 ObjString *takeString(char *chars, int length) {
   uint32_t hash = hashString(chars, length);
+
+  ObjString *interned =
+      tableFindInternedString(&vm.strings, chars, length, hash);
+  if (interned != NULL) {
+    FREE_ARRAY(char, chars, length + 1);
+    return interned;
+  }
+
   return allocateString(chars, length, hash);
 }
 
 ObjString *copyString(const char *chars, int length) {
   uint32_t hash = hashString(chars, length);
+
+  ObjString *interned =
+      tableFindInternedString(&vm.strings, chars, length, hash);
+  if (interned != NULL) {
+    return interned;
+  }
+
   char *heapChars = ALLOCATE(char, length + 1);
   memcpy(heapChars, chars, length);
   heapChars[length] = '\0';

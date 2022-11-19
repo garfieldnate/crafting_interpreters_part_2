@@ -32,5 +32,16 @@ bool tableGet(Table *table, ObjString *key, Value *value);
 bool tableSet(Table *table, ObjString *key, Value value);
 bool tableDelet(Table *table, ObjString *key);
 void tableAddAll(Table *from, Table *to);
+/**
+ * Given a VM's interned string table and a C-string, check if the C-string
+ * has been interned in the table. We need this as a dedicated function
+ * (instead of reusing findEntry) because we have to use char-level comparison
+ * for string equality instead of simple pointer-equality.
+ *
+ * @return NULL if c-string not interned yet, corresponding ObjString pointer if
+ * it is
+ */
+ObjString *tableFindInternedString(Table *table, const char *chars, int length,
+                                   uint32_t hash);
 
 #endif

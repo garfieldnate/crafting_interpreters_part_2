@@ -68,10 +68,9 @@ bool valuesEqual(Value a, Value b) {
     return AS_NUMBER(a) == AS_NUMBER(b);
   }
   case VAL_OBJ: {
-    ObjString *aString = AS_STRING(a);
-    ObjString *bString = AS_STRING(b);
-    return aString->length == bString->length &&
-           memcmp(aString->chars, bString->chars, aString->length) == 0;
+    // only supporting strings for now
+    // all strings are interned, so we can just check pointer equality
+    return AS_OBJ(a) == AS_OBJ(b);
   }
   // TODO: would be better to raise an error
   default:
