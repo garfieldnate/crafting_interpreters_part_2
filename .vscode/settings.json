@@ -28,7 +28,11 @@
     "optional": "c",
     "system_error": "c",
     "type_traits": "c",
-    "utility": "c"
+    "utility": "c",
+    "__tree": "c",
+    "algorithm": "c",
+    "locale": "c",
+    "typeinfo": "c"
   },
   "editor.formatOnSave": true
 }

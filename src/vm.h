@@ -15,6 +15,7 @@ typedef struct {
   // points to the next free slot in the stack (so the top element is
   // actually stack[stackTop - 1])
   Value *stackTop;
+  Table globals;
   // all created strings are interned here; entries keys are ObjString*, values
   // are NULL
   Table strings;

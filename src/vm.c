@@ -33,10 +33,12 @@ static void runtimeError(const char *format, ...) {
 void initVM() {
   resetStack();
   vm.objects = NULL;
+  initTable(&vm.globals);
   initTable(&vm.strings);
 }
 
 void freeVM() {
+  freeTable(&vm.globals);
   freeTable(&vm.strings);
   freeObjects();
 }
@@ -77,6 +79,7 @@ InterpretResult run() {
 // get the next byte of code and then increment the instruction pointer
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_STRING() AS_STRING(READ_CONSTANT())
 // use do-while loop so we can safely create a block of multiple statements
 // while also allowing semicolons after
 // TODO: shouldn't we be using Value instead of double here?
@@ -123,6 +126,18 @@ InterpretResult run() {
     }
     case OP_FALSE: {
       push(BOOL_VAL(false));
+      break;
+    }
+    case OP_POP: {
+      pop();
+      break;
+    }
+    case OP_DEFINE_GLOBAL: {
+      ObjString *name = READ_STRING();
+      tableSet(&vm.globals, name, peek(0));
+      // only pop() *after* adding to the table; otherwise garbage collection
+      // might remove the value in the middle of the table insertion operation
+      pop();
       break;
     }
     case OP_EQUAL: {
@@ -179,15 +194,20 @@ InterpretResult run() {
       push(NUMBER_VAL(-AS_NUMBER(pop())));
       break;
     }
-    case OP_RETURN: {
+    case OP_PRINT: {
       printValue(pop());
       printf("\n");
+      break;
+    }
+    case OP_RETURN: {
+      // exit interpreter
       return INTERPRET_OK;
     }
     }
   }
 
 #undef BINARY_OP
+#undef READ_STRING
 #undef READ_CONSTANT
 #undef READ_BYTE
 }
