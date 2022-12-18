@@ -37,7 +37,7 @@ typedef enum {
 } Precedence;
 
 // point to a function with no args or return values
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(bool canAssign);
 
 typedef struct {
   ParseFn prefix;
@@ -165,7 +165,7 @@ static void statement();
 static const ParseRule *getRule(TokenType type);
 static void parseExpressionWithPrecedence(Precedence precedence);
 
-static void binary() {
+static void binary(bool _canAssign) {
   // left-hand operand has already been consumed and compiled, and the value is
   // placed on the stack next we compile the right-hand operand, pushing it to
   // the stack, and then emit the bytecode to work with the two operands on the
@@ -219,7 +219,7 @@ static void binary() {
   }
 }
 
-static void literal() {
+static void literal(bool _canAssign) {
   switch (parser.previous.type) {
   case TOKEN_FALSE:
     emitByte(OP_FALSE);
@@ -236,17 +236,17 @@ static void literal() {
   }
 }
 
-static void grouping() {
+static void grouping(bool _canAssign) {
   expression();
   consume(TOKEN_RIGHT_PAREN, "Expected closing ')' after expression.");
 }
 
-static void number() {
+static void number(bool _canAssign) {
   double value = strtod(parser.previous.start, NULL);
   emitConstant(NUMBER_VAL(value));
 }
 
-static void string() {
+static void string(bool _canAssign) {
   // +1 and -2 trim the quotation marks
   // we copy the string data because we manage string lifetimes separately from
   // the source code lifetime
@@ -254,7 +254,26 @@ static void string() {
       copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
 
-static void unary() {
+static uint8_t identifierConstant(Token *name) {
+  return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
+}
+
+static void namedVariable(Token name, bool canAssign) {
+  uint8_t arg = identifierConstant(&name);
+
+  if (canAssign && match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(OP_SET_GLOBAL, arg);
+  } else {
+    emitBytes(OP_GET_GLOBAL, arg);
+  }
+}
+
+static void variable(bool canAssign) {
+  namedVariable(parser.previous, canAssign);
+}
+
+static void unary(bool _canAssign) {
   TokenType operatorType = parser.previous.type;
   // save the line number in case the following expression spans multiple-lines
   int line = parser.previous.line;
@@ -302,7 +321,7 @@ const ParseRule rules[] = {
     [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
-    [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
@@ -340,19 +359,21 @@ static void parseExpressionWithPrecedence(Precedence precedence) {
     return;
   }
 
-  prefixRule();
+  bool canAssign = precedence <= PREC_ASSIGNMENT;
+  prefixRule(canAssign);
 
   // prefix may then turn out to be an operand in an infix expression, which
   // may then be a prefix in another infix expression, etc.
   while (precedence <= getRule(parser.current.type)->precedence) {
     advance();
     ParseFn infixRule = getRule(parser.previous.type)->infix;
-    infixRule();
+    infixRule(canAssign);
   }
-}
 
-static uint8_t identifierConstant(Token *name) {
-  return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
+  // error for something like a*b = 5, which makes no sense
+  if (canAssign && match(TOKEN_EQUAL)) {
+    error("Invalid assignment target");
+  }
 }
 
 static uint8_t parseVariable(const char *errorMessage) {

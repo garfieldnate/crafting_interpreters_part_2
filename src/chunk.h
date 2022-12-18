@@ -12,7 +12,9 @@ typedef enum {
   OP_TRUE,
   OP_FALSE,
   OP_POP,
+  OP_GET_GLOBAL,
   OP_DEFINE_GLOBAL,
+  OP_SET_GLOBAL,
 
   // binary operators
   OP_ADD,

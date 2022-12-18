@@ -32,7 +32,8 @@
     "__tree": "c",
     "algorithm": "c",
     "locale": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "chunk.h": "c"
   },
   "editor.formatOnSave": true
 }

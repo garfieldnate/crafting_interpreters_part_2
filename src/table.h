@@ -30,7 +30,7 @@ void freeTable(Table *table);
  */
 bool tableGet(Table *table, ObjString *key, Value *value);
 bool tableSet(Table *table, ObjString *key, Value value);
-bool tableDelet(Table *table, ObjString *key);
+bool tableDelete(Table *table, ObjString *key);
 void tableAddAll(Table *from, Table *to);
 /**
  * Given a VM's interned string table and a C-string, check if the C-string

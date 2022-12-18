@@ -132,12 +132,37 @@ InterpretResult run() {
       pop();
       break;
     }
+    case OP_GET_GLOBAL: {
+      ObjString *name = READ_STRING();
+      Value value;
+      if (!tableGet(&vm.globals, name, &value)) {
+        runtimeError("Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      push(value);
+      break;
+    }
     case OP_DEFINE_GLOBAL: {
       ObjString *name = READ_STRING();
       tableSet(&vm.globals, name, peek(0));
       // only pop() *after* adding to the table; otherwise garbage collection
       // might remove the value in the middle of the table insertion operation
       pop();
+      break;
+    }
+    case OP_SET_GLOBAL: {
+      ObjString *name = READ_STRING();
+      // Lox doesn't support implicit variable declaration, so using the
+      // variable before it's defined is an error
+      if (tableSet(&vm.globals, name, peek(0))) {
+        // value was not legal to set in the first place, so we have to delete
+        // it again
+        tableDelete(&vm.globals, name);
+        runtimeError("Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      // we don't pop the assigned-to value, since assignment is an expression
+      // and has the same value as the one assigned
       break;
     }
     case OP_EQUAL: {
